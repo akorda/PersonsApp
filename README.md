@@ -1,6 +1,6 @@
 # Shiplex - PersonsApp
 
-Έχουμε ένα console application σε C# & net6.0 και θεωρούμε ότι έχουμε έναν τρόπο να γεμίζουμε ένα collection από `Person` instances.
+There is a console application written in `C#` & `net6.0` and lets suppose that there is a way to get a collection of `Person` instances:
 
 ```csharp
 public class Person
@@ -13,34 +13,35 @@ public class Person
 }
 ```
 
-Αυτό γίνεται με κλήση των:
+We could "load" these persons using:
 
 ```csharp
 var generator = new PersonsGenerator();
 var persons = generator.GeneratePersons(100);
 ```
-Ο πελάτης θα ήθελε να προσθέσουμε το παρακάτω functionality στο πρόγραμμά μας.
 
-## 1. Εκτύπωση γηραιότερου
+There is a new requirement to add the following functionality:
 
-Να υλοποιηθεί μέθοδος που τυπώνει το όνομα και την ηλικία του γηραιότερου ατόμου από τη λίστα των `Person`. Π.χ. να φανεί σε console κάτι σαν:
+## 1. Print the oldest person
+
+Implement a new method that prints out the name and the age of the *oldest* person. I.e. the following message should appear in the console:
 
 > Giorgos Papanikolaou, 37
 
-## 2. Στατιστικά
+## 2. Statistics
 
-Να υλοποιηθεί μέθοδος που τυπώνει σε console το κάθε όνομα και το πλήθος εμφάνισης του ονόματος. Η σειρά εμφάνισης να είναι το πλήθος σε φθίνουσα και σε περίπτωση που δύο ονόματα έχουν το ίδιο πλήθος αύξουσα αλφαβητική. Κάτι σαν:
+Implement a new method that writes in the console the name of each person and the number of times that this name exists in the collection. The print order should be the count descending and in the special case of two or more person names having the same count, then sort in alphabetical order ascending. Something like:
 
-```
+```text
 Giorgos     7
 Nikoleta    6
 Nikos       6
 Kostas      3
 ```
 
-## 3. Αποστολή ευχετήριου email
+## 3. Send emails
 
-Έστω ότι έχουμε την υλοποίηση του service `INameDayProvider` που παρέχει για μία ημέρα τα ονόματα που γιορτάζουν.
+Suppose that there is an implementation of the `INameDayProvider` service that provides the celebrating names a given day.
 
 ```csharp
 public interface INameDayService
@@ -48,9 +49,10 @@ public interface INameDayService
     Task<string[]> GetAnniversariesAsync(DateTime day, CancellationToken cancellationToken = default);
 }
 ```
-Θεωρούμε ότι η αποστολή των email γίνεται χρησιμοποιώντας μία εξωτερική διαδικασία που διαβάζει εγγραφές από έναν πίνακα `EmailMessages` μίας βάσης δεδομένων σε SQL Server που έχουν `Status = Pending`. Η δομή του πίνακα είναι:
 
-```
+Emails are sent using an external process that reads records from an SQL Server database table named `EmailMessages` with `Status = Pending`. The schema of this table is:
+
+```text
 [Id] [nvarchar](50) NOT NULL PRIMARY KEY,
 [Subject] [nvarchar](500) NULL,
 [Body] [nvarchar](max) NULL,
@@ -60,10 +62,12 @@ public interface INameDayService
 [Status] [nvarchar](50) NOT NULL
 ```
 
-Επομένως ο τρόπος που το πρόγραμμά μας θα στέλνει τα email, είναι να προσθέσει ένα ή περισσότερα rows στον πίνακα `EmailMessages`. Οι παραλήπτες (στο `ToAddresses`, `CcAddresses` ή `BccAddresses`) μπορεί να είναι πολλαπλοί χωρισμένοι με το χαρακτήρα `;` π.χ.:
+Therefore, the way that our program will send the emails is to add one or more rows in `EmailMessages` table. The recipients of an email (fields `ToAddresses`, `CcAddresses` and `BccAddresses`) could be more than one, separated using the `;` character. E.g.
 
-> nikos2@example.com;nikoleta21@example.com
+```text
+nikos2@example.com;nikoleta21@example.com
+```
 
-Να γραφτεί μέθοδος που να αποστέλνει email στους σημερινούς εορτάζοντες με θέμα `Χίλιες ευχές για τη γιορτή σου!` και περιεχόμενο `Σήμερα γιορτάζει ο Nikos. Χρόνια σου πολλά!`.
+Implement a new method that send emails to all persons that celebrate **today** with subject `Happy Name Day` and body `Today is the name day of Nikos. Many wishes!`.
 
-> ℹ️ Η λέξη 'Nikos' στο περιεχόμενο διαφέρει ανάλογα με το όνομα του παραλήπτη.
+> ℹ️ The word 'Nikos' in the body of the email is the name of the email recipient.
